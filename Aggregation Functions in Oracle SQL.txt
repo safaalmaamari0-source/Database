@@ -1,0 +1,164 @@
+COUNT:
+SELECT COUNT(*) AS Total_Employees
+FROM EMPLOYEES;
+
+RESULT:
+TOTAL_EMPLOYEES
+---------------
+            107
+SELECT COUNT(*) AS Total_Departments
+FROM DEPARTMENTS;
+
+RESULT:
+TOTAL_DEPARTMENTS
+-----------------
+               27
+
+
+SUM:
+SELECT SUM(SALARY) AS Total_Salary
+FROM EMPLOYEES;
+
+RESULT:
+TOTAL_SALARY
+------------
+      691416
+
+SELECT SUM(COMMISSION_PCT) AS Total_Commission
+FROM EMPLOYEES;
+
+RESULT:
+TOTAL_COMMISSION
+----------------
+             7.8
+AVG:
+SELECT ROUND(AVG(SALARY), 2) AS Avg_Salary
+FROM EMPLOYEES;
+
+RESULT:
+AVG_SALARY
+----------
+   6461.83
+
+SELECT ROUND(AVG(MIN_SALARY), 2) AS Avg_Min_Salary,
+       ROUND(AVG(MAX_SALARY), 2) AS Avg_Max_Salary
+FROM JOBS;
+
+RESULT:
+AVG_MIN_SALARY AVG_MAX_SALARY
+-------------- --------------
+       6573.05       13215.16
+
+MAX & MIN:
+SELECT MAX(SALARY) AS Highest_Salary,
+       MIN(SALARY) AS Lowest_Salary
+FROM EMPLOYEES;
+
+RESULT:
+HIGHEST_SALARY LOWEST_SALARY
+-------------- -------------
+         24000          2100
+
+
+SELECT MAX(MAX_SALARY) AS Highest_Max_Salary,
+       MIN(MAX_SALARY) AS Lowest_Max_Salary
+FROM JOBS;
+RESULT:
+HIGHEST_MAX_SALARY LOWEST_MAX_SALARY
+------------------ -----------------
+             40000              5000
+
+GROUP BY:
+SELECT DEPARTMENT_ID,
+       COUNT(*) AS Total_Employees
+FROM EMPLOYEES
+GROUP BY DEPARTMENT_ID
+ORDER BY DEPARTMENT_ID;
+
+
+SELECT JOB_TITLE,
+       ROUND(AVG(MIN_SALARY), 2) AS Avg_Min_Salary,
+       ROUND(AVG(MAX_SALARY), 2) AS Avg_Max_Salary
+FROM JOBS
+GROUP BY JOB_TITLE
+ORDER BY JOB_TITLE;
+
+RESULT:
+
+DEPARTMENT_ID TOTAL_EMPLOYEES
+------------- ---------------
+           10               1
+           20               2
+           30               6
+           40               1
+           50              45
+           60               5
+           70               1
+           80              34
+           90               3
+          100               6
+          110               2
+
+DEPARTMENT_ID TOTAL_EMPLOYEES
+------------- ---------------
+                            1
+
+
+JOB_TITLE                           AVG_MIN_SALARY AVG_MAX_SALARY
+----------------------------------- -------------- --------------
+Accountant                                    4200           9000
+Accounting Manager                            8200          16000
+Administration Assistant                      3000           6000
+Administration Vice President                15000          30000
+Finance Manager                               8200          16000
+Human Resources Representative                4000           9000
+Marketing Manager                             9000          15000
+Marketing Representative                      4000           9000
+President                                    20080          40000
+Programmer                                    4000          10000
+Public Accountant                             4200           9000
+
+JOB_TITLE                           AVG_MIN_SALARY AVG_MAX_SALARY
+----------------------------------- -------------- --------------
+Public Relations Representative               4500          10500
+Purchasing Clerk                              2500           5500
+Purchasing Manager                            8000          15000
+Sales Manager                                10000          20080
+Sales Representative                          6000          12008
+Shipping Clerk                                2500           5500
+Stock Clerk                                   2008           5000
+Stock Manager                                 5500           8500
+
+HAVING:
+SELECT DEPARTMENT_ID,
+       COUNT(*) AS Total_Employees
+FROM EMPLOYEES
+GROUP BY DEPARTMENT_ID
+HAVING COUNT(*) > 5
+ORDER BY Total_Employees DESC;
+
+
+SELECT JOB_TITLE,
+       ROUND(AVG(MAX_SALARY), 2) AS Avg_Max_Salary
+FROM JOBS
+GROUP BY JOB_TITLE
+HAVING AVG(MAX_SALARY) > 15000
+ORDER BY Avg_Max_Salary DESC;
+
+RESULT:
+
+DEPARTMENT_ID TOTAL_EMPLOYEES
+------------- ---------------
+           50              45
+           80              34
+          100               6
+           30               6
+
+
+JOB_TITLE                           AVG_MAX_SALARY
+----------------------------------- --------------
+President                                    40000
+Administration Vice President                30000
+Sales Manager                                20080
+Accounting Manager                           16000
+Finance Manager                              16000
