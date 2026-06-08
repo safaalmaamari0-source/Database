@@ -1,0 +1,139 @@
+INSERT INTO Employee (SSN, FName, LName, BD, Gender, Dnum, Supervisor_SSN)
+  VALUES (123456789, 'James', 'Borg', DATE '1947-11-10', 'Male', 1, NULL);
+  
+UPDATE Departments SET SSN = 123456789 WHERE DNum = 1;
+
+INSERT INTO Departments (DNum, DName, Hiring_date, SSN)
+VALUES (5, 'Research',       DATE '1988-05-22', NULL);
+
+INSERT INTO Departments (DNum, DName, Hiring_date, SSN)
+VALUES (4, 'Administration', DATE '1995-01-01', NULL);
+
+INSERT INTO Departments (DNum, DName, Hiring_date, SSN)
+VALUES (3, 'IT',             DATE '2000-03-15', NULL);
+
+INSERT INTO Departments (DNum, DName, Hiring_date, SSN)
+  VALUES (2, 'HR',             DATE '2005-09-30', NULL);
+  
+INSERT INTO Employee (SSN, FName, LName, BD, Gender, Dnum, Supervisor_SSN)
+  VALUES (333445555, 'Franklin',  'Wong',    DATE '1965-12-08', 'Male',   5, 123456789);
+  
+INSERT INTO Employee (SSN, FName, LName, BD, Gender, Dnum, Supervisor_SSN)
+VALUES (987654321, 'Jennifer',  'Wallace', DATE '1941-06-20', 'Female', 4, 123456789);
+
+INSERT INTO Employee (SSN, FName, LName, BD, Gender, Dnum, Supervisor_SSN)
+VALUES (999887777, 'Alicia',    'Zelaya',  DATE '1968-01-19', 'Female', 4, 987654321);
+
+INSERT INTO Employee (SSN, FName, LName, BD, Gender, Dnum, Supervisor_SSN)
+ VALUES (453453453, 'Joyce',     'English', DATE '1972-07-31', 'Female', 5, 333445555);
+ 
+UPDATE Departments SET SSN = 333445555 WHERE DNum = 5;
+UPDATE Departments SET SSN = 987654321 WHERE DNum = 4;
+UPDATE Departments SET SSN = 999887777 WHERE DNum = 3;
+UPDATE Departments SET SSN = 453453453 WHERE DNum = 2;
+
+SELECT DNum, DName, SSN FROM Departments;
+
+SELECT SSN, FName, LName, Dnum, Supervisor_SSN FROM Employee;
+
+INSERT INTO DEPT_LOCATIONS VALUES (1, 'Houston');
+INSERT INTO DEPT_LOCATIONS VALUES (5, 'Bellaire');
+INSERT INTO DEPT_LOCATIONS VALUES (5, 'Sugarland');
+INSERT INTO DEPT_LOCATIONS VALUES (4, 'Stafford');
+INSERT INTO DEPT_LOCATIONS VALUES (3, 'Austin');
+
+INSERT INTO PROJECT VALUES (1,  'ProductX',        'Bellaire',  'Houston', 5);
+INSERT INTO PROJECT VALUES (2,  'ProductY',        'Sugarland', 'Houston', 5);
+INSERT INTO PROJECT VALUES (3,  'ProductZ',        'Houston',   'Houston', 5);
+INSERT INTO PROJECT VALUES (10, 'Computerization', 'Stafford',  'Houston', 4);
+INSERT INTO PROJECT VALUES (20, 'Reorganization',  'Houston',   'Houston', 1);
+
+
+DELETE FROM DEPENDENT;
+DELETE FROM WORKS_ON;
+DELETE FROM PROJECT;
+DELETE FROM DEPT_LOCATIONS;
+DELETE FROM Employee;
+DELETE FROM Departments;
+COMMIT;
+
+SELECT * FROM DEPT_LOCATIONS;
+SELECT * FROM PROJECT;
+SELECT * FROM WORKS_ON;
+SELECT * FROM DEPENDENT;
+
+INSERT INTO WORKS_ON VALUES (123456789, 20, NULL);
+INSERT INTO WORKS_ON VALUES (333445555, 1,  32.5);
+INSERT INTO WORKS_ON VALUES (333445555, 2,  7.5);
+INSERT INTO WORKS_ON VALUES (987654321, 10, 35.0);
+INSERT INTO WORKS_ON VALUES (453453453, 3,  40.0);
+
+SELECT * FROM DEPT_LOCATIONS;
+SELECT * FROM PROJECT;
+
+INSERT INTO DEPT_LOCATIONS VALUES (1, 'Houston');
+INSERT INTO DEPT_LOCATIONS VALUES (5, 'Bellaire');
+INSERT INTO DEPT_LOCATIONS VALUES (5, 'Sugarland');
+INSERT INTO DEPT_LOCATIONS VALUES (4, 'Stafford');
+INSERT INTO DEPT_LOCATIONS VALUES (3, 'Austin');
+
+INSERT INTO PROJECT VALUES (1,  'ProductX',        'Bellaire',  'Houston', 5);
+INSERT INTO PROJECT VALUES (2,  'ProductY',        'Sugarland', 'Houston', 5);
+INSERT INTO PROJECT VALUES (3,  'ProductZ',        'Houston',   'Houston', 5);
+INSERT INTO PROJECT VALUES (10, 'Computerization', 'Stafford',  'Houston', 4);
+INSERT INTO PROJECT VALUES (20, 'Reorganization',  'Houston',   'Houston', 1);
+
+
+INSERT INTO WORKS_ON VALUES (123456789, 20, NULL);
+INSERT INTO WORKS_ON VALUES (333445555, 1,  32.5);
+INSERT INTO WORKS_ON VALUES (333445555, 2,  7.5);
+INSERT INTO WORKS_ON VALUES (987654321, 10, 35.0);
+INSERT INTO WORKS_ON VALUES (453453453, 3,  40.0);
+
+
+INSERT INTO DEPENDENT VALUES (333445555, 'Alice',    DATE '1986-04-05');
+INSERT INTO DEPENDENT VALUES (333445555, 'Theodore', DATE '1983-10-25');
+INSERT INTO DEPENDENT VALUES (333445555, 'Joy',      DATE '1958-05-03');
+INSERT INTO DEPENDENT VALUES (987654321, 'Abner',    DATE '1942-02-28');
+INSERT INTO DEPENDENT VALUES (123456789, 'Michael',  DATE '1988-01-04');
+
+SELECT * FROM DEPT_LOCATIONS;
+SELECT * FROM PROJECT;
+
+SELECT * FROM DEPT_LOCATIONS;
+
+
+-----ERRORS------
+
+Error starting at line : 1 in command -
+INSERT INTO Employee (SSN, FName, LName, BD, Gender)
+VALUES (123456789, 'James', 'Borg',    DATE '1947-11-10', 'Male')
+Error report -
+ORA-01400: cannot insert NULL into ("SAFA"."EMPLOYEE"."DNUM")
+https://docs.oracle.com/error-help/db/ora-01400/
+More Details :
+https://docs.oracle.com/error-help/db/ora-01400/ what is the error and how to fix
+
+Error starting at line : 1 in command -
+INSERT INTO Departments (DNum, DName, Hiring_date, SSN)
+  VALUES (1, 'Headquarters', DATE '1981-06-19', NULL)
+Error report -
+ORA-00001: unique constraint (SAFA.SYS_C007494) violated
+https://docs.oracle.com/error-help/db/ora-00001/
+More Details :
+https://docs.oracle.com/error-help/db/ora-00001/
+
+Error starting at line : 65 in command -
+INSERT INTO WORKS_ON VALUES (123456789, 20, NULL)
+Error report -
+ORA-02291: integrity constraint (SAFA.FK_WORK_PROJ) violated - parent key not found
+https://docs.oracle.com/error-help/db/ora-02291/
+More Details :
+https://docs.oracle.com/error-help/db/ora-02291/
+Error starting at line : 66 in command -
+INSERT INTO WORKS_ON VALUES (333445555, 1,  32.5)
+Error report -
+ORA-02291: integrity constraint (SAFA.FK_WORK_PROJ) violated - parent key not found
+https://docs.oracle.com/error-help/db/ora-02291/
+More Details :
+https://docs.oracle.com/error-help/db/ora-02291/
