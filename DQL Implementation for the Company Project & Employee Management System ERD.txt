@@ -1,0 +1,116 @@
+1.SELECT FName, LName, Gender, BD
+FROM Employee;
+
+result:
+FNAME                LNAME                GENDER     BD       
+-------------------- -------------------- ---------- ---------
+James                Borg                 Male       10-NOV-47
+Franklin             Wong                 Male       08-DEC-65
+Jennifer             Wallace              Female     20-JUN-41
+Alicia               Zelaya               Female     19-JAN-68
+Joyce                English              Female     31-JUL-72
+
+2.SELECT FName, LName, Dnum
+FROM Employee
+WHERE Dnum = 4;
+
+result:
+
+FNAME                LNAME                      DNUM
+-------------------- -------------------- ----------
+Jennifer             Wallace                       4
+Alicia               Zelaya                        4
+
+3.SELECT Pname, Plocation, City
+FROM PROJECT;
+
+result:
+
+PNAME                                              PLOCATION                                          CITY                                              
+-------------------------------------------------- -------------------------------------------------- --------------------------------------------------
+ProductX                                           Bellaire                                           Houston                                           
+ProductY                                           Sugarland                                          Houston                                           
+ProductZ                                           Houston                                            Houston                                           
+Computerization                                    Stafford                                           Houston                                           
+Reorganization                                     Houston                                            Houston                                           
+
+4.SELECT D.DName, E.FName, E.LName, D.Hiring_date
+FROM Departments D, Employee E
+WHERE D.SSN = E.SSN;
+
+result:
+DNAME                FNAME                LNAME                HIRING_DA
+-------------------- -------------------- -------------------- ---------
+Headquarters         James                Borg                 19-JUN-81
+Research             Franklin             Wong                 22-MAY-88
+Administration       Jennifer             Wallace              01-JAN-95
+IT                   Alicia               Zelaya               15-MAR-00
+HR                   Joyce                English              30-SEP-05
+
+5.SELECT Dependent_name
+FROM DEPENDENT
+WHERE SSN = 333445555;
+
+result:
+DEPENDENT_NAME                                    
+--------------------------------------------------
+Alice
+Joy
+Theodore
+
+6.SELECT E.FName, E.LName, W.Hours
+FROM Employee E, WORKS_ON W
+WHERE E.SSN = W.SSN
+AND W.Pnumber = 1;
+
+result:
+
+FNAME                LNAME                     HOURS
+-------------------- -------------------- ----------
+Franklin             Wong                       32.5
+
+7.SELECT D.DName, L.Dlocation
+FROM Departments D, DEPT_LOCATIONS L
+WHERE D.DNum = L.Dnumber;
+
+result:
+DNAME                DLOCATION                                         
+-------------------- --------------------------------------------------
+Headquarters         Houston                                           
+IT                   Austin                                            
+Administration       Stafford                                          
+Research             Bellaire                                          
+Research             Sugarland 
+
+8.SELECT FName, LName, Supervisor_SSN
+FROM Employee
+WHERE Supervisor_SSN = 123456789;
+
+result:
+FNAME                LNAME                SUPERVISOR_SSN
+-------------------- -------------------- --------------
+Franklin             Wong                      123456789
+Jennifer             Wallace                   123456789
+
+9.SELECT Pname, Plocation, City
+FROM PROJECT
+WHERE Dnum = 5;
+
+result:
+PNAME                                              PLOCATION                                          CITY                                              
+-------------------------------------------------- -------------------------------------------------- --------------------------------------------------
+ProductX                                           Bellaire                                           Houston                                           
+ProductY                                           Sugarland                                          Houston                                           
+ProductZ                                           Houston                                            Houston                                           
+
+10.SELECT FName, LName, Gender, BD
+FROM Employee
+WHERE Gender = 'Female';
+
+result:
+FNAME                LNAME                GENDER     BD       
+-------------------- -------------------- ---------- ---------
+Jennifer             Wallace              Female     20-JUN-41
+Alicia               Zelaya               Female     19-JAN-68
+Joyce                English              Female     31-JUL-72
+  
