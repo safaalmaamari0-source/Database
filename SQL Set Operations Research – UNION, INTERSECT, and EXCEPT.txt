@@ -1,0 +1,92 @@
+--UNIUN:
+
+DEFINATION:
+The SQL UNION operator is used to combine the result sets of two or more SELECT queries into a single output. 
+It removes duplicate rows and returns only unique records from all combined queries.
+
+SYNTAX:
+SELECT column_name FROM table1
+UNION
+SELECT column_name FROM table2;
+
+
+--INTERSECT:
+
+Returns only the rows that are common to both SELECT statements.
+Duplicates are removed. Use it to find the common ground between two queries — 
+employees who exist in two departments, products ordered in two regions, etc.
+
+SYNTAX:
+SELECT columns FROM table1
+INTERSECT
+SELECT columns FROM table2;
+
+--EXCEPT:
+
+Returns the rows from the first SELECT statement that are not in the second SELECT statement.
+Use it to find gaps — customers who never ordered, employees with no job history, products not yet sold.
+
+SYNTAX:
+SELECT columns FROM table1
+EXCEPT
+SELECT columns FROM table2;
+
+
+--Rules & Conditions:
+
+*Same Number of Columns
+Both SELECT statements must return the same number of columns. A mismatch causes a syntax error.
+*Compatible Data Types
+Corresponding columns must have compatible data types — e.g., you cannot combine a VARCHAR column with a DATE column.
+*Column Names from First Query
+The result set uses the column names (aliases) defined in the first SELECT statement.
+*ORDER BY Goes at the End
+Only one ORDER BY clause is allowed — placed after the last SELECT statement, and it sorts the entire combined result.
+
+
+--Difference between UNION and UNION ALL:
+UNION
+-Removes duplicate rows from the final result.
+-Performs an implicit DISTINCT sort/hash operation.
+-Slower — extra work to de-duplicate.
+-Use when uniqueness matters.
+
+UNION ALL
+-Keeps all rows, including exact duplicates.
+-No de-duplication overhead.
+-Faster — simply appends rows.
+-Use when duplicates are acceptable or expected.
+
+Practical Example:
+--UNIUN:
+SELECT city
+FROM   locations
+UNION
+SELECT city
+FROM   departments
+  JOIN   locations USING (location_id)
+ORDER BY city;
+
+
+--INTERSECT:
+SELECT job_id
+FROM   employees
+INTERSECT
+SELECT job_id
+FROM   job_history
+ORDER BY job_id;
+
+
+--EXCEPT:
+SELECT employee_id
+FROM   employees
+MINUS                
+SELECT employee_id
+FROM   job_history
+ORDER BY employee_id;
+
+
+
+
+
+
