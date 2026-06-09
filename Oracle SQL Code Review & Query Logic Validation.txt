@@ -1,0 +1,93 @@
+Query Review 1:
+--Analyze the returned results--
+*What actually happens at runtime:
+Employee #1 gets matched to Department #1 (accidentally correct or wrong department)
+Employee #5 gets matched to Department #5 (may not be their actual department)
+Most employees likely return no rows at all or wrong department names.
+
+--Determine whether the business logic is correct--
+*The JOIN condition is semantically incorrect,It joins two unrelated keys.
+*These columns have no meaningful relationship to each other. The query 
+ accidentally matches employees to departments only when their numeric IDs
+ happen to be equal — which is coincidental, not logical.
+ 
+--Rewrite or improve the query if necessary--
+SELECT e.first_name, e.last_name, d.department_name
+FROM employees e
+JOIN departments d
+ON e.department_id = d.department_id;
+
+--Briefly explain why the original query was incorrect and why the revised version is better--
+ *The employees table typically holds a foreign key department_id that references the departments
+  table. The join should link that foreign key to its corresponding primary key, this ensures every
+  employee is matched to their actual department, not a coincidental ID match.
+
+Query Review 2:
+--Analyze the returned results--
+*When I run this Query it shows error, the reason: Oracle is trying to compare two columns 
+of different data types. It attempts an implicit conversion and fails because one side contains non-numeric characters.
+
+--Determine whether the business logic is correct--
+*This Query joining two semantically unrelated keys, these have no logical relationship to each other. 
+ The query only returns rows where an employee's ID number accidentally equals a job's ID number.
+
+--Rewrite or improve the query if necessary--
+SELECT e.first_name, e.last_name, j.job_title
+FROM employees e
+JOIN jobs j
+ON e.job_id = j.job_id;
+
+--Briefly explain why the original query was incorrect and why the revised version is better--
+* The original query incorrect because, it's joining two semantically unrelated keys. In The revise version Every employee
+ is now matched to the job role they are actually assigned to, not a coincidental numeric match.
+
+Query Review 3:
+--Analyze the returned results--
+This query has a silent but critical logical contradiction, the WHERE clause kills the LEFT JOIN. The WHERE clause filters
+ on a column from the right table. Since NULL ≠ 'Sales', all unassigned employees are silently dropped — the LEFT JOIN is 
+effectively converted into an INNER JOIN.
+
+--Determine whether the business logic is correct--
+ The Business Logic Is Contradictory, the query contains two conflicting business intentions written in the same statement,
+these two intentions directly contradict each other and cannot both be satisfied simultaneously.
+
+--Rewrite or improve the query if necessary--
+SELECT e.first_name, d.department_name
+FROM employees e
+INNER JOIN departments d
+    ON e.department_id = d.department_id
+WHERE d.department_name = 'Sales';
+
+--Briefly explain why the original query was incorrect and why the revised version is better--
+* The original query used LEFT JOIN to keep all employees but then used WHERE d.department_name = 'Sales' 
+which filtered out all NULL rows — silently defeating the purpose of the LEFT JOIN and behaving exactly like an INNER JOIN anyway.
+ The fix either uses INNER JOIN explicitly when only Sales employees are needed, or moves the filter into the ON clause when all 
+employees need to be preserved.
+
+
+Query Review 4:
+
+--Analyze the returned results--
+The query attempts a self join on the employees table, which is the correct approach for finding manager relationships. 
+However the ON clause is reversed, this is backwards. It finds employees whose ID matches someone else's manager_id — 
+meaning it returns managers and who reports to them, not employees and who manages them.
+
+--Determine whether the business logic is correct--
+The business logic is broken because the JOIN condition is written in the wrong direction. 
+The query is supposed to answer the simple business question.
+
+--Rewrite or improve the query if necessary--
+SELECT 
+    e.first_name  AS employee_name,
+    m.first_name  AS manager_name
+FROM employees e
+JOIN employees m
+ON e.manager_id = m.employee_id;
+
+--Briefly explain why the original query was incorrect and why the revised version is better--
+The original query had the JOIN condition written backwards — e.employee_id = m.manager_id — 
+which flipped the entire relationship, mistakenly showing managers as employees and employees as managers. 
+The fix corrects this by reversing the condition to e.manager_id = m.employee_id, which properly follows the natural 
+foreign key to primary key direction, ensuring each employee is correctly paired with their actual manager. 
+Adding a LEFT JOIN with COALESCE further improves the query by making sure the top-level employee like the CEO, 
+who has no manager, is never silently dropped from the results.
