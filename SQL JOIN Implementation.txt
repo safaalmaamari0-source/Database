@@ -1,0 +1,86 @@
+*INNER JOIN:
+SELECT E.FName || ' ' || E.LName  AS Employee_Name,
+       D.DName                     AS Department_Name,
+       P.Pname                     AS Project_Name,
+       W.Hours                     AS Hours_Worked
+FROM   EMPLOYEE   E
+INNER JOIN DEPARTMENTS D  ON E.Dnum     = D.DNum
+INNER JOIN WORKS_ON    W  ON E.SSN      = W.SSN
+INNER JOIN PROJECT     P  ON W.Pnumber  = P.Pnumber
+ORDER BY D.DName, E.LName;
+
+output:
+EMPLOYEE_NAME                             DEPARTMENT_NAME      PROJECT_NAME                                       HOURS_WORKED
+----------------------------------------- -------------------- -------------------------------------------------- ------------
+Jennifer Wallace                          Administration       Computerization                                              35
+James Borg                                Headquarters         Reorganization                                                 
+Joyce English                             Research             ProductZ                                                     40
+Franklin Wong                             Research             ProductX                                                   32.5
+Franklin Wong                             Research             ProductY                                                    7.5
+
+
+*LEFT JOIN:
+SELECT E.FName || ' ' || E.LName        AS Employee_Name,
+       D.DName                           AS Department_Name,
+       NVL(DP.Dependent_name, 'None')   AS Dependent_Name,
+       DP.Bday                           AS Dependent_Birthdate
+FROM   EMPLOYEE    E
+LEFT JOIN DEPARTMENTS D   ON E.Dnum = D.DNum
+LEFT JOIN DEPENDENT   DP  ON E.SSN  = DP.SSN
+ORDER BY E.LName;
+
+output:
+
+EMPLOYEE_NAME                             DEPARTMENT_NAME      DEPENDENT_NAME                                     DEPENDENT
+----------------------------------------- -------------------- -------------------------------------------------- ---------
+James Borg                                Headquarters         Michael                                            04-JAN-88
+Joyce English                             Research             None                                                        
+Jennifer Wallace                          Administration       Abner                                              28-FEB-42
+Franklin Wong                             Research             Theodore                                           25-OCT-83
+Franklin Wong                             Research             Alice                                              05-APR-86
+Franklin Wong                             Research             Joy                                                03-MAY-58
+Alicia Zelaya                             Administration       None        
+
+
+*RIGHT JOIN:
+
+SELECT NVL(E.FName || ' ' || E.LName, 'No Employee Assigned') AS Employee_Name,
+       D.DName                                                  AS Department_Name,
+       P.Pname                                                  AS Project_Name,
+       P.Plocation                                              AS Project_Location,
+       NVL(TO_CHAR(W.Hours), 'N/A')                            AS Hours_Worked
+FROM   WORKS_ON    W
+RIGHT JOIN PROJECT     P  ON W.Pnumber  = P.Pnumber
+LEFT  JOIN EMPLOYEE    E  ON W.SSN      = E.SSN
+LEFT  JOIN DEPARTMENTS D  ON P.Dnum     = D.DNum
+ORDER BY P.Pname;
+
+output:
+
+EMPLOYEE_NAME                             DEPARTMENT_NAME      PROJECT_NAME                                       PROJECT_LOCATION                                   HOURS_WORKED                            
+----------------------------------------- -------------------- -------------------------------------------------- -------------------------------------------------- ----------------------------------------
+Jennifer Wallace                          Administration       Computerization                                    Stafford                                           35                                      
+Franklin Wong                             Research             ProductX                                           Bellaire                                           32.5                                    
+Franklin Wong                             Research             ProductY                                           Sugarland                                          7.5                                     
+Joyce English                             Research             ProductZ                                           Houston                                            40                                      
+James Borg                                Headquarters         Reorganization                                     Houston                                            N/A        
+
+
+*SELF JOIN:
+SELECT E.FName  || ' ' || E.LName  AS Employee_Name,
+       NVL(M.FName || ' ' || M.LName, 'No Supervisor') AS Supervisor_Name,
+       D.DName                      AS Department_Name
+FROM   EMPLOYEE    E
+LEFT  JOIN EMPLOYEE    M  ON E.Supervisor_SSN = M.SSN
+INNER JOIN DEPARTMENTS D  ON E.Dnum           = D.DNum
+ORDER BY D.DName, E.LName;
+
+output:
+
+EMPLOYEE_NAME                             SUPERVISOR_NAME                           DEPARTMENT_NAME     
+----------------------------------------- ----------------------------------------- --------------------
+Jennifer Wallace                          James Borg                                Administration      
+Alicia Zelaya                             Jennifer Wallace                          Administration      
+James Borg                                                                          Headquarters        
+Joyce English                             Franklin Wong                             Research            
+Franklin Wong                             James Borg                                Research                                             
