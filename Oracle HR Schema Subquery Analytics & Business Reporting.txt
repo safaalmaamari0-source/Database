@@ -1,0 +1,392 @@
+1. Salary Analysis Using Subqueries:
+*Employees earning more than the company average salary
+
+SELECT AVG(salary) FROM employees;        
+SELECT first_name, last_name, salary
+FROM   employees
+WHERE  salary > (SELECT AVG(salary) FROM employees)
+ORDER BY salary DESC;
+
+--THE LOGIC:
+Find the average salary of all employees, then show only the employees whose salary is higher than that average, sorted from highest to lowest.
+
+-- THE TYPE OF SUBQUERY USED:
+Scalary Subquery
+
+*Employees earning less than the company's highest salary.
+SELECT first_name, last_name, salary
+FROM   employees
+WHERE  salary < (SELECT MAX(salary) FROM employees)
+ORDER BY salary DESC;
+
+--THE LOGIC:
+Find the highest salary in the company, then show every employee who earns less than that — sorted from highest to lowest.
+
+-- THE TYPE OF SUBQUERY USED:
+Scalary Subquery 
+
+*Departments whose average salary exceeds the company average salary
+SELECT department_id,
+       ROUND(AVG(salary), 0) AS avg_dept_salary
+FROM   employees
+GROUP BY department_id
+HAVING AVG(salary) > (SELECT AVG(salary) FROM employees)
+ORDER BY avg_dept_salary DESC;
+
+
+--THE LOGIC:
+Calculate the company-wide average salary, then show only the departments whose own average salary is higher than that — sorted from highest to lowest.
+
+-- THE TYPE OF SUBQUERY USED:
+Scalary Subquery
+
+
+*Employees earning the highest salary within their department
+SELECT department_id,
+       first_name,
+       last_name,
+       salary
+FROM   employees e
+WHERE  salary = (SELECT MAX(salary)
+                 FROM   employees
+                 WHERE  department_id = e.department_id)
+ORDER BY department_id;
+
+--THE LOGIC:
+For each employee, check if their salary equals the highest salary in their own department — if yes, show them.
+
+-- THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+------------------------------------------------------------------
+
+2. Department & Location Analysis:
+*Employees working in departments located in the United States
+SELECT employee_id,
+       first_name,
+       last_name,
+       department_id
+FROM   employees
+WHERE  department_id IN (SELECT department_id
+                         FROM   departments
+                         WHERE  location_id IN (SELECT location_id
+                                                FROM   locations
+                                                WHERE  country_id IN (SELECT country_id
+                                                                      FROM   countries
+                                                                      WHERE  country_name = 'United States of America')))
+ORDER BY department_id;
+
+--THE LOGIC:
+Find the country ID for USA, use it to find US locations, use those to find US departments, then show all employees who work in those departments.
+
+-- THE TYPE OF SUBQUERY USED:
+Nested Subquery
+
+*Departments that currently contain employees.
+
+
+--THE LOGIC:
+Get the list of all department IDs that appear in the employees table, then show only those departments from the departments table
+
+-- THE TYPE OF SUBQUERY USED:
+Multiple-Row Subquery 
+
+*Departments that currently have no employees
+SELECT department_id,
+       department_name
+FROM   departments
+WHERE  department_id NOT IN (SELECT DISTINCT department_id
+                              FROM   employees
+                              WHERE  department_id IS NOT NULL)
+ORDER BY department_id;
+
+--THE LOGIC:
+Get the list of all department IDs that appear in the employees table, then show only the departments that are NOT in that list.
+
+-- THE TYPE OF SUBQUERY USED:
+Multiple-Row Subquery
+
+*Employees working in departments located in the Europe region using nested subqueries
+SELECT employee_id,
+       first_name,
+       last_name,
+       department_id
+FROM   employees
+WHERE  department_id IN (SELECT department_id
+                         FROM   departments
+                         WHERE  location_id IN (SELECT location_id
+                                                FROM   locations
+                                                WHERE  country_id IN (SELECT country_id
+                                                                      FROM   countries
+                                                                      WHERE  region_id = (SELECT region_id
+                                                                                          FROM   regions
+                                                                                          WHERE  region_name = 'Europe'))))
+ORDER BY department_id;
+
+--THE LOGIC:
+Find the Europe region ID, use it to find European countries, use those to find European locations, use those to find European departments, then show all employees in those departments.
+
+-- THE TYPE OF SUBQUERY USED:
+Single-Row Subquery, Multiple-Row Subqueries.
+----------------------------------------------------------
+3. Manager & Hierarchy Analysis:
+*Employees earning more than their manager.
+SELECT employee_id, first_name, last_name, salary, manager_id
+FROM   employees e
+WHERE  salary > (SELECT salary
+                  FROM   employees
+                  WHERE  employee_id = e.manager_id)
+ORDER BY salary DESC;
+
+--THE LOGIC:
+For each employee, find their manager's salary — if the employee earns more, show them.
+
+-- THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+
+*Managers supervising at least one employee earning more than 10,000.
+SELECT DISTINCT e.employee_id, e.first_name, e.last_name, e.salary
+FROM   employees e
+WHERE  e.employee_id IN (SELECT manager_id
+                          FROM   employees
+                          WHERE  salary > 10000
+                          AND    manager_id IS NOT NULL)
+ORDER BY e.salary DESC;
+--THE LOGIC:
+Find managers who have at least one employee directly under them earning more than $10,000.
+
+-- THE TYPE OF SUBQUERY USED:
+Multiple-Row Subquery
+
+*Employees whose manager works in the same department.
+SELECT employee_id, first_name, last_name, department_id, manager_id
+FROM   employees e
+WHERE  department_id = (SELECT department_id
+                         FROM   employees
+                         WHERE  employee_id = e.manager_id)
+ORDER BY department_id;
+
+--THE LOGIC:
+For each employee, find which department their manager belongs to — if it matches the employee's department, show them.
+
+-- THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+
+*Employees whose manager works in a different department.
+SELECT employee_id, first_name, last_name, department_id, manager_id
+FROM   employees e
+WHERE  manager_id IS NOT NULL
+AND    department_id <> (SELECT department_id
+                          FROM   employees
+                          WHERE  employee_id = e.manager_id)
+ORDER BY department_id;
+
+--THE LOGIC:
+For each employee, find which department their manager belongs to — if it does NOT match the employee's department, show them.
+
+-- THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+--------------------------------------------------------------
+
+4. Inline View & Query Execution:
+
+*Filtering employees earning more than 10,000.
+SELECT emp_id, emp_name, emp_salary
+FROM  (
+         SELECT employee_id                    AS emp_id,
+                first_name || ' ' || last_name  AS emp_name,
+                salary                         AS emp_salary
+         FROM   employees
+       ) high_earners
+WHERE  emp_salary > 10000
+ORDER BY emp_salary DESC;
+
+
+--THE LOGIC:
+Build a temporary table of all employees with clean column names, then filter it to show only those earning more than $10,000.
+
+--THE TYPE OF SUBQUERY USED:
+Inline View
+
+*Displaying departments with average salary greater than 9,000.
+SELECT dept_id, dept_avg_salary
+FROM  (
+         SELECT department_id           AS dept_id,
+                ROUND(AVG(salary), 0)  AS dept_avg_salary
+         FROM   employees
+         WHERE  department_id IS NOT NULL
+         GROUP BY department_id
+       ) dept_avgs
+WHERE  dept_avg_salary > 9000
+ORDER BY dept_avg_salary DESC;
+
+--THE LOGIC:
+Build a temporary table showing the average salary per department, then filter it to show only departments whose average exceeds $9,000.
+
+--THE TYPE OF SUBQUERY USED:
+Inline View
+
+*Displaying departments with more than five employees.
+SELECT dept_id, emp_count
+FROM  (
+         SELECT department_id  AS dept_id,
+                COUNT(*)       AS emp_count
+         FROM   employees
+         WHERE  department_id IS NOT NULL
+         GROUP BY department_id
+       ) dept_counts
+WHERE  emp_count > 5
+ORDER BY emp_count DESC;
+
+--THE LOGIC:
+Build a temporary table showing the employee count per department, then filter it to show only departments with more than 5 employees.
+
+--THE TYPE OF SUBQUERY USED:
+Inline View
+--------------------------------------------------------------
+5. Advanced Subquery Logic:
+
+*Employees earning above their department average salary.
+SELECT first_name, last_name, department_id, salary
+FROM   employees e
+WHERE  salary > (SELECT AVG(salary)
+                  FROM   employees
+                  WHERE  department_id = e.department_id)
+ORDER BY department_id, salary DESC;
+
+--THE LOGIC:
+For each employee, calculate the average salary in their own department — if their salary is higher than that average, show them.
+
+--THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+
+*Employees earning above the average salary for their job role.
+SELECT first_name, last_name, job_id, salary
+FROM   employees e
+WHERE  salary > (SELECT AVG(salary)
+                  FROM   employees
+                  WHERE  job_id = e.job_id)
+ORDER BY job_id, salary DESC;
+
+--THE LOGIC:
+For each employee, calculate the average salary for their specific job role — if their salary is higher than that role's average, show them.
+
+--THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+
+*Departments where all employees earn more than 5,000.
+SELECT DISTINCT department_id
+FROM   employees
+WHERE  department_id NOT IN (SELECT department_id
+                              FROM   employees
+                              WHERE  salary <= 5000
+                              AND    department_id IS NOT NULL)
+AND    department_id IS NOT NULL
+ORDER BY department_id;
+
+--THE LOGIC:
+Find departments where NO employee earns 5,000 or less — meaning ALL employees in that department earn more than 5,000
+
+--THE TYPE OF SUBQUERY USED:
+Multiple-row subquery
+
+*Employees who are the only employee in their department.
+SELECT employee_id, first_name, last_name, department_id
+FROM   employees e
+WHERE  department_id IS NOT NULL
+AND    (SELECT COUNT(*)
+         FROM   employees
+         WHERE  department_id = e.department_id) = 1
+ORDER BY department_id;
+
+--THE LOGIC:
+Find employees whose department has exactly 1 employee — meaning they are the only person in their department.
+
+--THE TYPE OF SUBQUERY USED:
+Correlated Subquery
+----------------------------------------------------------
+6. Executive HR Analytics Challenge
+
+*Employees earning above the company average salary.
+SELECT employee_id, first_name, last_name, salary
+FROM   employees
+WHERE  salary > (SELECT AVG(salary)
+                  FROM   employees)
+ORDER BY salary DESC;
+
+--THE LOGIC:
+Calculate the average salary across all employees — then show every employee whose salary is above that number.
+
+--THE TYPE OF SUBQUERY USED:
+Single-Row
+
+*Departments with more employees than Department 50.
+SELECT department_id,
+       COUNT(*) AS emp_count
+FROM   employees
+WHERE  department_id IS NOT NULL
+GROUP BY department_id
+HAVING COUNT(*) > (SELECT COUNT(*)
+                      FROM   employees
+                      WHERE  department_id = 50)
+ORDER BY emp_count DESC;
+
+--THE LOGIC:
+Count how many employees are in Department 50 — then show every other department that has more employees than that count
+
+--THE TYPE OF SUBQUERY USED:
+Single-Row Subquery
+
+*Employees working in the department with the highest average salary.
+SELECT employee_id, first_name, last_name, salary, department_id
+FROM   employees
+WHERE  department_id = (SELECT department_id
+                        FROM  (SELECT department_id,
+                                      AVG(salary) AS avg_sal
+                               FROM   employees
+                               WHERE  department_id IS NOT NULL
+                               GROUP BY department_id) dept_avgs
+                        WHERE  avg_sal = (SELECT MAX(avg_sal)
+                                         FROM  (SELECT AVG(salary) AS avg_sal
+                                                FROM   employees
+                                                WHERE  department_id IS NOT NULL
+                                                GROUP BY department_id) dept_maxs))
+ORDER BY salary DESC;
+--THE LOGIC:
+Find which department has the highest average salary — then show all employees who work in that department.
+--THE TYPE OF SUBQUERY USED:
+Nested + Inline View
+
+*Employees earning the second-highest salary.
+SELECT employee_id, first_name, last_name, salary
+FROM   employees
+WHERE  salary = (SELECT MAX(salary)
+                  FROM   employees
+                  WHERE  salary < (SELECT MAX(salary)
+                                     FROM   employees))
+ORDER BY salary DESC;
+--THE LOGIC:
+Find the highest salary — then find the highest salary below that — employees earning that second value are the 2nd highest earners.
+
+--THE TYPE OF SUBQUERY USED:
+Nested Single-Row
+
+*Managers whose employees' average salary exceeds 10,000.
+SELECT m.employee_id,
+       m.first_name || ' ' || m.last_name AS manager_name,
+       m.salary                            AS manager_salary,
+       ma.team_avg_salary
+FROM   employees m
+JOIN  (SELECT   manager_id,
+                ROUND(AVG(salary), 0) AS team_avg_salary
+         FROM     employees
+         WHERE    manager_id IS NOT NULL
+         GROUP BY manager_id
+         HAVING   AVG(salary) > 10000) ma
+ON     m.employee_id = ma.manager_id
+ORDER BY ma.team_avg_salary DESC;
+
+--THE LOGIC:
+Group employees by manager — calculate the average salary per manager's team — show only managers whose team average exceeds $10,000.
+
+--THE TYPE OF SUBQUERY USED:
+Inline View + JOIN
