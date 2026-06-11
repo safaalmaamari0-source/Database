@@ -1,0 +1,177 @@
+1) Query Review 1:
+--SQL Logic Review--
+*Analyze the output or error:
+ -AVG() was placed directly in WHERE — Oracle forbids group functions there because WHERE runs before grouping occurs.
+
+*Determine whether the business logic is correct.
+-The business intent is correct — the syntax is wrong.
+
+*Rewrite or improve the query if necessary.
+SELECT first_name, last_name, salary
+FROM   employees
+WHERE  salary > (SELECT AVG(salary) FROM employees)
+ORDER BY salary DESC;
+
+*Explain the reasoning behind the correction.
+because SQL cannot calculate the average of all salaries while it is still reading each row one by one — it needs to finish reading everything first.
+
+--Query Logic Analysis--
+*Whether the appropriate subquery type was used.
+After fix — Single-Row Subquery. AVG() always returns exactly one value — one number. 
+Used correctly with the > operator which expects one value on the right side.
+
+*Whether the query returns a single-row or multi-row result correctly.
+The subquery returns a single value ($6,462). The > operator is correct here — it would fail if the subquery returned multiple rows.
+ AVG() guarantees a single row so the operator matches.
+
+*Whether comparison operators match the expected result set.
+The > operator is correct for "earning MORE than". If the requirement was "earning at least the average" the operator should be >= instead.
+ Employees earning exactly the average are excluded by > — which is the standard interpretation.
+
+*Whether execution order affects the outcome.
+Original query failed because WHERE runs before GROUP functions are available. 
+The fix places AVG() in a subquery — which runs before the outer WHERE clause. Execution order is now: subquery → FROM → WHERE → SELECT → ORDER BY.
+
+*Whether the business requirement is correctly implemented.
+Employees earning more than the company average salary" — the corrected query delivers exactly this. 
+It computes the company-wide average across all 107 employees and returns only those whose individual salary exceeds it.
+
+2) Query Review 2:
+
+--SQL Logic Review--
+*Analyze the output or error.
+= expects exactly one value — but SELECT department_id FROM employees returns 107 rows — one per employee. Oracle cannot compare one value against 107 values.
+
+*Determine whether the business logic is correct.
+The query has no filter on the employees table — it pulls all department_ids from all 107 employees without any condition.
+
+*Rewrite or improve the query if necessary.
+SELECT department_id, department_name
+FROM   departments
+WHERE  department_id IN (SELECT DISTINCT department_id
+                          FROM   employees
+                          WHERE  department_id IS NOT NULL)
+ORDER BY department_id;
+
+*Explain the reasoning behind the correction.
+The = operator is a one-to-one comparison — but the subquery handed it 107 values at once, which is like asking Oracle to be in 107 places simultaneously.
+
+--Query Logic Analysis--
+*Whether the appropriate subquery type was used.
+The subquery returns 107 rows — one per employee. This is a Multiple-Row Subquery. The = operator is only valid for Single-Row Subqueries.
+ The wrong subquery type was paired with the wrong operator.
+
+*Whether the query returns a single-row or multi-row result correctly.
+SELECT department_id FROM employees returns 107 rows — clearly multi-row. The query writer incorrectly assumed it would return one row.
+
+*Whether comparison operators match the expected result set.
+= is only valid when the subquery returns exactly one row. Since this subquery returns 107 rows, = must be replaced with IN to handle a list of values.
+
+*Whether execution order affects the outcome.
+Execution order is fine — subquery runs first, outer query filters after. The problem is not timing but the operator mismatch between = and a multi-row result.
+
+*Whether the business requirement is correctly implemented.
+The intent — finding departments linked to employees — is valid. However the query has no filter condition on employees, making the business question ambiguous. It is unclear whether all departments with employees are wanted or something specific.
+
+3) Query Review 3:
+
+--SQL Logic Review--
+*Analyze the output or error.
+The previous two errors — ORA-00934 and ORA-01427 — both error messages. This one says nothing and returns zero rows quietly. 
+Always verify that the column in your subquery matches the meaning of the column in the outer WHERE clause — not just the data type.
+
+*Determine whether the business logic is correct.
+No valid business question exists for this comparison.
+
+*Rewrite or improve the query if necessary.
+SELECT *
+FROM   employees
+WHERE  department_id IN (SELECT DISTINCT department_id
+                          FROM   employees
+                          WHERE  department_id IS NOT NULL)
+ORDER BY department_id;
+
+*Explain the reasoning behind the correction.
+The subquery must return department_id values — not salary values — because that is what the outer WHERE clause is comparing against.
+
+--Query Logic Analysis--
+*Whether the appropriate subquery type was used.
+The IN operator and multiple-row subquery structure are technically correct — IN is the right choice when a subquery returns many rows.
+ The problem is not the subquery type but the column selected inside it.
+
+*Whether the query returns a single-row or multi-row result correctly.
+The subquery returns 107 rows of salary values — IN handles this correctly from a syntax perspective. 
+But returning salary values when department_id values are expected is a semantic error not a structural one.
+
+*Whether comparison operators match the expected result set.
+IN is the correct operator for a multi-row subquery — no issue here. The operator is not the source of the problem in this query.
+
+*Whether execution order affects the outcome.
+Execution order is fine — subquery runs first returning all salaries, outer query then checks each department_id against that list. 
+The process runs in the right order — it just compares the wrong things.
+
+*Whether the business requirement is correctly implemented.
+No clear valid business requirement — comparing department_id to salary values is semantically meaningless.
+No real-world business question would ask "find employees whose department ID appears in the list of all salaries
+
+4) Query Review 4:
+
+--SQL Logic Review--
+*Analyze the output or error.
+ORA-00911: invalid character
+Oracle found a character it did not expect. This is almost always caused by an invisible special character — such as a curly/smart quote, 
+a non-breaking space, or a hidden Unicode character — that looks normal on screen but is not valid SQL syntax.
+
+*Determine whether the business logic is correct.
+Comparing salaries against a department is a valid business need — but the exact comparison is ambiguous.
+
+*Rewrite or improve the query if necessary.
+SELECT first_name, last_name, salary
+FROM   employees
+WHERE  salary > (SELECT MAX(salary)
+                  FROM   employees
+                  WHERE  department_id = 90)
+ORDER BY salary DESC;
+
+*Explain the reasoning behind the correction.
+Retype the query cleanly to remove hidden characters, then choose the right approach for the multi-row subquery.
+
+--Query Logic Analysis--
+
+*Whether the appropriate subquery type was used.
+The subquery returns 3 rows — one salary per employee in dept 90. 
+A Single-Row Subquery with > was used but a Multi-Row Subquery with ANY, ALL, or MAX() was needed.
+
+*Whether the query returns a single-row or multi-row result correctly.
+Dept 90 has 3 employees → subquery returns 3 salary values → multi-row result. 
+The > operator only works with single-row results — causing ORA-01427 once ORA-00911 is fixed.
+
+*Whether comparison operators match the expected result set.
+> alone is wrong for multi-row results. The correct choices are: > MAX() for "above the highest", > ANY for "above at least one", > ALL for "above every value".
+
+*Whether execution order affects the outcome.
+Execution order is fine — subquery is designed to run first. The problems are the hidden character and the operator mismatch, not the execution sequence.
+
+*Whether the business requirement is correctly implemented.
+The intent — finding employees who earn more than those in department 90 — is a valid and clear business question. The logic makes sense as a salary comparison report.
+
+------Final Reflection------
+
+--Why subqueries are useful in enterprise HR reporting systems.
+Subqueries allow HR reports to dynamically calculate thresholds like averages, maximums, and counts at runtime,
+so reports always reflect current data without hardcoded values.
+
+--The difference between JOIN-based thinking and subquery-based thinking.
+JOIN thinking combines tables side by side to produce wider rows, while subquery thinking answers an inner question first and uses that result to filter the outer question.
+
+--Why some subqueries produce runtime errors.
+Runtime errors occur when there is a mismatch between the operator used and what the subquery actually returns — 
+such as using = when the subquery returns multiple rows, or placing a group function like AVG() directly in WHERE before grouping has occurred.
+
+--Why SQL execution order is important.
+SQL does not execute in the order it is written — it follows a fixed internal sequence of FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY — 
+and understanding this order explains why certain functions and aliases are available in some clauses but not others.
+
+--Why understanding query logic is more valuable than memorizing syntax.
+Syntax can be looked up in seconds and varies between databases, but query logic — knowing what question to ask, which operator fits the result, 
+and whether the business requirement is correctly expressed — is the skill that determines whether your query returns the right answer.
